@@ -28,10 +28,10 @@ else:
 dataset = TT100K(dtdir, transforms=get_transform(train=True))
 dataset_test = TT100K(dtdir, split='test', transforms=get_transform(train=False))
 data_loader = torch.utils.data.DataLoader(
-    dataset, batch_size=2, shuffle=True, num_workers=0,
+    dataset, batch_size=2, shuffle=True, num_workers=4,
     collate_fn=utils.collate_fn)
 data_loader_test = torch.utils.data.DataLoader(
-    dataset_test, batch_size=1, shuffle=False, num_workers=0,
+    dataset_test, batch_size=1, shuffle=False, num_workers=4,
     collate_fn=utils.collate_fn)
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')

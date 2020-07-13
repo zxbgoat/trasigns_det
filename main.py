@@ -1,3 +1,4 @@
+import sys
 import torch
 import utils
 import torchvision
@@ -20,14 +21,17 @@ frrcnn = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
 in_features = frrcnn.roi_heads.box_predictor.cls_score.in_features
 frrcnn.roi_heads.box_predictor = FastRCNNPredictor(in_features, cls_num)
 
-dtdir = '/home/tesla/Workspace/dataset/tt100k'
+if len(sys.argv) >= 2:
+    dtdir = sys.argv[2]
+else:
+    dtdir = '/home/tesla/Workspace/dataset/tt100k'
 dataset = TT100K(dtdir, transforms=get_transform(train=True))
 dataset_test = TT100K(dtdir, split='test', transforms=get_transform(train=False))
 data_loader = torch.utils.data.DataLoader(
-    dataset, batch_size=2, shuffle=True, num_workers=4,
+    dataset, batch_size=2, shuffle=True, num_workers=0,
     collate_fn=utils.collate_fn)
 data_loader_test = torch.utils.data.DataLoader(
-    dataset_test, batch_size=1, shuffle=False, num_workers=4,
+    dataset_test, batch_size=1, shuffle=False, num_workers=0,
     collate_fn=utils.collate_fn)
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -47,3 +51,8 @@ for epoch in range(num_epochs):
     lr_scheduler.step()
     # evaluate on the test dataset
     evaluate(frrcnn, data_loader_test, device=device)
+
+wtpath = 'fasterrcnn_r50_fpn_10e_tt100k.pth'
+torch.save(frrcnn.state_dict(), wtpath)
+modelpath = 'fasterrcnn_r50_fpn_10e_tt100k.pkl'
+torch.save(frrcnn, modelpath)

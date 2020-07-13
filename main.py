@@ -35,6 +35,8 @@ data_loader_test = torch.utils.data.DataLoader(
     collate_fn=utils.collate_fn)
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+if torch.cuda.device_count() > 1:
+    frrcnn = torch.nn.DataParallel(frrcnn)
 frrcnn.to(device)
 params = [p for p in frrcnn.parameters() if p.requires_grad]
 optimizer = torch.optim.SGD(params, lr=0.005,

@@ -4,9 +4,10 @@ ARG CUDNN="7"
 
 FROM pytorch/pytorch:${PYTORCH}-cuda${CUDA}-cudnn${CUDNN}-runtime
 
-RUN apt install gcc\
-    && pip install scikit-image\
-    && pip install pycocotools
+RUN apt-get update\
+    && apt-get install -y gcc\
+    && pip install -i https://pypi.tuna.tsinghua.edu.cn/simple scikit-image\
+    && pip install -i https://pypi.tuna.tsinghua.edu.cn/simple pycocotools
 RUN git clone https://github.com/zxbgoat/trasigns_det.git /trasigns
 
 WORKDIR /trasigns

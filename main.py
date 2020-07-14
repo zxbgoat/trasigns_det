@@ -22,7 +22,7 @@ in_features = frrcnn.roi_heads.box_predictor.cls_score.in_features
 frrcnn.roi_heads.box_predictor = FastRCNNPredictor(in_features, cls_num)
 
 if len(sys.argv) >= 2:
-    dtdir = sys.argv[2]
+    dtdir = sys.argv[1]
 else:
     dtdir = '/home/tesla/Workspace/dataset/tt100k'
 dataset = TT100K(dtdir, transforms=get_transform(train=True))

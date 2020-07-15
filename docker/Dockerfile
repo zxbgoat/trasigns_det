@@ -10,8 +10,8 @@ RUN apt-get update \
     && apt-get install -y tmux \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-RUN pip install scikit-image \
-    && pip install pycocotools
+RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple scikit-image \
+    && pip install -i https://pypi.tuna.tsinghua.edu.cn/simple pycocotools
 RUN git clone https://github.com/zxbgoat/trasigns_det.git /trasigns
 
 WORKDIR /trasigns

@@ -6,6 +6,7 @@ import transforms as T
 from tt100k import TT100K
 from engine import train_one_epoch, evaluate
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+from torchvision.models.detection.transform import GeneralizedRCNNTransform
 
 
 def get_transform(train):
@@ -18,6 +19,9 @@ def get_transform(train):
 
 cls_num = 83
 frrcnn = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
+frrcnn.transform = GeneralizedRCNNTransform(min_size=2048, max_size=2048,
+                                            image_mean=[0.485, 0.456, 0.406],
+                                            image_std=[0.229, 0.224, 0.225])
 in_features = frrcnn.roi_heads.box_predictor.cls_score.in_features
 frrcnn.roi_heads.box_predictor = FastRCNNPredictor(in_features, cls_num)
 
@@ -28,7 +32,7 @@ else:
 dataset = TT100K(dtdir, transforms=get_transform(train=True))
 dataset_test = TT100K(dtdir, split='test', transforms=get_transform(train=False))
 data_loader = torch.utils.data.DataLoader(
-    dataset, batch_size=2, shuffle=True, num_workers=4,
+    dataset, batch_size=1, shuffle=True, num_workers=4,
     collate_fn=utils.collate_fn)
 data_loader_test = torch.utils.data.DataLoader(
     dataset_test, batch_size=1, shuffle=False, num_workers=4,

@@ -52,7 +52,7 @@ class ToTensor(object):
 
 def get_transform(train):
     transforms = []
-    transforms.append(T.ToTensor())
+    transforms.append(ToTensor())
     if train:
-        transforms.append(T.RandomHorizontalFlip(0.5))
-    return T.Compose(transforms)
+        transforms.append(RandomHorizontalFlip(0.5))
+    return Compose(transforms)

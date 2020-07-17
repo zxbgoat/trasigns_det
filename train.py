@@ -3,9 +3,9 @@ import utils
 import argparse
 import torchvision
 from data.tt100k import TT100K
-from data.transforms import get_transform
-import utils
+import utils.utils as utils
 from utils.frrcnn import build_model
+from utils.transforms import get_transform
 from utils.engine import train_one_epoch, evaluate
 
 parser = argparse.ArgumentParser()
@@ -22,7 +22,7 @@ parser.add_argument('--bchsz', type=int, default=1,
                     help='batch size while training')
 parser.add_argument('--epcnum', type=int, default=10,
                     help='epoch num to be trained')
-args = parser.parse()
+args = parser.parse_args()
 print(args)
 
 dataset = TT100K(args.dtdir, transforms=get_transform(train=True))
@@ -34,11 +34,12 @@ data_loader_test = torch.utils.data.DataLoader(
     dataset_test, batch_size=1, shuffle=False, num_workers=4,
     collate_fn=utils.collate_fn)
 
+model  = build_model(args.clsnum, args.minsz, args.maxsz)
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 if torch.cuda.device_count() > 1:
-    frrcnn = torch.nn.DataParallel(frrcnn)
-frrcnn.to(device)
-params = [p for p in frrcnn.parameters() if p.requires_grad]
+    model = torch.nn.DataParallel(model)
+model.to(device)
+params = [p for p in model.parameters() if p.requires_grad]
 optimizer = torch.optim.SGD(params, lr=0.005,
                             momentum=0.9, weight_decay=0.0005)
 lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
@@ -47,11 +48,11 @@ lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
 
 for epoch in range(args.epcnum):
     # train for one epoch, printing every 10 iterations
-    train_one_epoch(frrcnn, optimizer, data_loader, device, epoch, print_freq=10)
+    train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq=10)
     # update the learning rate
     lr_scheduler.step()
     # evaluate on the test dataset
-    evaluate(frrcnn, data_loader_test, device=device)
+    evaluate(model, data_loader_test, device=device)
 
 modelpath = 'fasterrcnn_r50_fpn_10e_tt100k.pkl'
-torch.save(frrcnn, modelpath)
+torch.save(model, modelpath)
